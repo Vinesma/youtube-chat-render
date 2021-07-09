@@ -24,28 +24,35 @@ def get_message(line):
     """Returns the message typed in chat."""
     return line.split(': ')[-1].strip()
 
-def parse_file(path):
-    """Read and parse a file with chat contents."""
-    messages = []
+def read_file(path):
+    """Read a file with chat contents."""
+    lines = []
     count = 0
 
     with open(path, 'r') as _file:
         for line in _file:
             if not has_negative_timestamp(line):
-                chat_message = {
-                    'author': get_author(line),
-                    'text': get_message(line),
-                    'timestamp': get_timestamp(line),
-                }
-                messages.append(chat_message)
-            
+                lines.append(line)
             count += 1
 
-    livestream_length = messages[-1]["timestamp"]
+    print(f'Parsed {count} lines.')
 
-    print(f'Parsed {count} messages.')
+    return lines
+
+def parse_lines(lines):
+    """Parse raw chat lines to return the timeline and livestream lenght"""
+    messages = []
+    livestream_length = get_timestamp(lines[-1])
+
+    for line in lines:
+        chat_message = {
+            'author': get_author(line),
+            'text': get_message(line),
+            'timestamp': get_timestamp(line),
+        }
+        messages.append(chat_message)
+
     print(f'Livestream ran for: {livestream_length}')
-
     return [messages, livestream_length]
 
 def advance_time(time_hour, time_minute, time_second):
@@ -125,8 +132,9 @@ def main():
     main_dir = os.path.abspath('.')
     raw_chat_file = os.path.join(main_dir, 'files', 'chat.txt')
 
-    messages, livestream_length = parse_file(raw_chat_file)
-    generate_frame(messages)
+    raw_chat = read_file(raw_chat_file)
+    messages, livestream_length = parse_lines(raw_chat)
+    # generate_frame(messages)
 
     # find_empty(messages, livestream_length)
     
