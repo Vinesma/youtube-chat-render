@@ -40,7 +40,7 @@ def read_file(path):
     return lines
 
 def parse_lines(lines):
-    """Parse raw chat lines to return the timeline and livestream lenght"""
+    """Parse raw chat lines to return the timeline and livestream length"""
     messages = []
     livestream_length = get_timestamp(lines[-1])
 
