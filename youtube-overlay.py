@@ -1,5 +1,7 @@
 import os
 import sys
+import re
+from PIL import Image, ImageDraw, ImageFont
 
 def clear_screen():
     """Clears the terminal screen using the OS specific method."""
@@ -14,8 +16,9 @@ def get_timestamp(line):
     return line.split(' ')[0]
 
 def get_author(line):
-    """Returns the message's author along with member status (if applicable)."""
-    return line.split(' | ')[1].split(': ')[0]
+    """Returns the message's author with member status removed (if applicable)."""
+    author = line.split(' | ')[1].split(': ')[0]
+    return re.sub(r'\((New|Member).+\)', '', author)
 
 def get_message(line):
     """Returns the message typed in chat."""
@@ -90,12 +93,42 @@ def find_empty(messages, livestream_length):
         else:
             count += 1
 
+def generate_frame(messages):
+    """Generate one frame of the chat window"""
+    font_size = 16
+    offset_c = font_size + 2
+    font_path='/usr/share/fonts/OTF/ipamp.ttf'
+    font_color=(255, 255, 255)
+    image_width = 400
+    image_height = offset_c * 32
+    image_type='RGBA'
+    image_bg_color_rgba = (28, 31, 32, 230)
+    frame_message_count = image_height / offset_c
+
+    image = Image.new(image_type, (image_width, image_height), image_bg_color_rgba)
+    font = ImageFont.truetype(font_path, size=font_size)
+    draw = ImageDraw.Draw(image)
+
+    for index, message in enumerate(messages):
+        offset = offset_c * index
+        text = f"{message['author']}: {message['text']}"
+        draw.text((5, offset), text, fill=font_color, font=font)
+
+        #@TODO remove this
+        if index >= frame_message_count - 2:
+            break
+
+    image.show()
+    print(f'image window supports {frame_message_count} messages')
+
 def main():
     main_dir = os.path.abspath('.')
     raw_chat_file = os.path.join(main_dir, 'files', 'chat.txt')
 
     messages, livestream_length = parse_file(raw_chat_file)
-    find_empty(messages, livestream_length)
+    generate_frame(messages)
+
+    # find_empty(messages, livestream_length)
     
 if __name__ == "__main__":
     main()
