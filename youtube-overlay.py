@@ -39,21 +39,12 @@ def read_file(path):
 
     return lines
 
-def parse_lines(lines):
-    """Parse raw chat lines to return the timeline and livestream length"""
-    messages = []
-    livestream_length = get_timestamp(lines[-1])
-
-    for line in lines:
-        chat_message = {
-            'author': get_author(line),
-            'text': get_message(line),
-            'timestamp': get_timestamp(line),
-        }
-        messages.append(chat_message)
-
-    print(f'Livestream ran for: {livestream_length}')
-    return [messages, livestream_length]
+def format_time(time_minute, time_second, time_hour = None):
+    """Format time to supported format"""
+    if time_hour == None:
+        return f'{time_minute}:{time_second:02}'
+    else:
+        return f'{time_hour}:{time_minute:02}:{time_second:02}'
 
 def advance_time(time_hour, time_minute, time_second):
     """Add one second to the clock."""
@@ -69,18 +60,69 @@ def advance_time(time_hour, time_minute, time_second):
     
     if time_hour > 0:
         return [
-            f'{time_hour}:{time_minute:02}:{time_second:02}',
+            format_time(time_minute, time_second, time_hour),
             time_hour,
             time_minute,
             time_second,
         ]
     else:
         return [
-            f'{time_minute}:{time_second:02}',
+            format_time(time_minute, time_second),
             time_hour,
             time_minute,
             time_second,
         ]
+
+def parse_lines(lines):
+    """Parse raw chat lines to return the timeline and livestream length"""
+    time_hour = 0
+    time_minute = 0
+    time_second = 0
+    current_time = format_time(time_minute, time_second)
+    livestream_length = get_timestamp(lines[-1])
+    messages = []
+    line_count = 0
+    
+    # Do this until the end of the livestream
+    while current_time != livestream_length:
+        line = lines[line_count]
+        # Check if the timestamp matches a message
+        if current_time != get_timestamp(line):
+            print(f'{current_time} has no messages')
+            # If not: set an empty message at that timestamp and add one second to the clock
+            chat_message = {
+                'author': None,
+                'text': None,
+                'timestamp': current_time,
+            }
+            messages.append(chat_message)
+
+            current_time, time_hour, time_minute, time_second = advance_time(
+                                                                            time_hour,
+                                                                            time_minute,
+                                                                            time_second
+                                                                            )
+        else:
+            # If yes: save the message and look ahead for one more in the same timestamp
+            chat_message = {
+                'author': get_author(line),
+                'text': get_message(line),
+                'timestamp': get_timestamp(line),
+            }
+            messages.append(chat_message)
+            
+            # If there is one more in the same timestamp: update the line count but not the clock
+            if current_time == get_timestamp(lines[line_count + 1]):
+                line_count += 1
+            else:
+                line_count += 1
+                current_time, time_hour, time_minute, time_second = advance_time(time_hour,
+                                                                                time_minute,
+                                                                                time_second
+                                                                                )
+
+    print(f'Livestream ran for: {livestream_length}')
+    return [messages, livestream_length]
 
 def find_empty(messages, livestream_length):
     time_hour = 0
@@ -128,12 +170,14 @@ def generate_frame(messages):
     image.show()
     print(f'image window supports {frame_message_count} messages')
 
+
 def main():
     main_dir = os.path.abspath('.')
     raw_chat_file = os.path.join(main_dir, 'files', 'chat.txt')
 
     raw_chat = read_file(raw_chat_file)
     messages, livestream_length = parse_lines(raw_chat)
+
     # generate_frame(messages)
 
     # find_empty(messages, livestream_length)
