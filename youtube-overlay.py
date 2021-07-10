@@ -1,163 +1,20 @@
 import os
-import sys
-import re
-from PIL import Image, ImageDraw, ImageFont
+import pprint
 
-def clear_screen():
-    """Clears the terminal screen using the OS specific method."""
-    os.system('clear' if sys.platform == 'linux' else 'cls')
+from core.chat import ChatParser
+from core.frame import FrameGenerator
 
-def has_negative_timestamp(line):
-    """Checks if the message has a negative timestamp."""
-    return line.startswith('-')
-
-def get_timestamp(line):
-    """Returns the timestamp of the message."""
-    return line.split(' ')[0]
-
-def get_author(line):
-    """Returns the message's author with member status removed (if applicable)."""
-    author = line.split(' | ')[1].split(': ')[0]
-    return re.sub(r'\((New|Member).+\)', '', author)
-
-def get_message(line):
-    """Returns the message typed in chat."""
-    return line.split(': ')[-1].strip()
-
-def read_file(path):
-    """Read a file with chat contents."""
-    lines = []
-    count = 0
-
-    with open(path, 'r') as _file:
-        for line in _file:
-            if not has_negative_timestamp(line):
-                lines.append(line)
-            count += 1
-
-    print(f'Parsed {count} lines.')
-
-    return lines
-
-def format_time(time_minute, time_second, time_hour = None):
-    """Format time to supported format"""
-    if time_hour == None:
-        return f'{time_minute}:{time_second:02}'
-    else:
-        return f'{time_hour}:{time_minute:02}:{time_second:02}'
-
-def advance_time(time_hour, time_minute, time_second):
-    """Add one second to the clock."""
-    if time_second != 59:
-        time_second += 1
-    else:
-        time_second = 0
-        if time_minute != 59:
-            time_minute += 1
-        else:
-            time_minute = 0
-            time_hour += 1
-    
-    if time_hour > 0:
-        return [
-            format_time(time_minute, time_second, time_hour),
-            time_hour,
-            time_minute,
-            time_second,
-        ]
-    else:
-        return [
-            format_time(time_minute, time_second),
-            time_hour,
-            time_minute,
-            time_second,
-        ]
-
-def parse_lines(lines):
-    """Parse raw chat lines to return the timeline and livestream length"""
-    time_hour = 0
-    time_minute = 0
-    time_second = 0
-    current_time = format_time(time_minute, time_second)
-    livestream_length = get_timestamp(lines[-1])
-    messages = []
-    line_count = 0
-    
-    # Do this until the end of the livestream
-    while current_time != livestream_length:
-        line = lines[line_count]
-        # Check if the timestamp matches a message
-        if current_time != get_timestamp(line):
-            # If not: set an empty message at that timestamp and add one second to the clock
-            chat_message = {
-                'author': None,
-                'text': None,
-                'timestamp': current_time,
-            }
-            messages.append(chat_message)
-
-            current_time, time_hour, time_minute, time_second = advance_time(
-                                                                            time_hour,
-                                                                            time_minute,
-                                                                            time_second
-                                                                            )
-        else:
-            # If yes: save the message and look ahead for one more in the same timestamp
-            chat_message = {
-                'author': get_author(line),
-                'text': get_message(line),
-                'timestamp': get_timestamp(line),
-            }
-            messages.append(chat_message)
-            
-            # If there is one more in the same timestamp: update the line count but not the clock
-            if current_time == get_timestamp(lines[line_count + 1]):
-                line_count += 1
-            else:
-                line_count += 1
-                current_time, time_hour, time_minute, time_second = advance_time(time_hour,
-                                                                                time_minute,
-                                                                                time_second
-                                                                                )
-
-    print(f'Livestream ran for: {livestream_length}')
-    return messages
-
-def generate_frame(messages):
-    """Generate one frame of the chat window"""
-    font_size = 16
-    offset_c = font_size + 2
-    font_path='/usr/share/fonts/OTF/ipamp.ttf'
-    font_color=(255, 255, 255)
-    image_width = 400
-    image_height = offset_c * 32
-    image_type='RGBA'
-    image_bg_color_rgba = (28, 31, 32, 230)
-    frame_message_count = image_height / offset_c
-
-    image = Image.new(image_type, (image_width, image_height), image_bg_color_rgba)
-    font = ImageFont.truetype(font_path, size=font_size)
-    draw = ImageDraw.Draw(image)
-
-    for index, message in enumerate(messages):
-        offset = offset_c * index
-        text = f"{message['author']}: {message['text']}"
-        draw.text((5, offset), text, fill=font_color, font=font)
-
-        #@TODO remove this
-        if index >= frame_message_count - 2:
-            break
-
-    image.show()
-    print(f'image window supports {frame_message_count} messages')
-    
 def main():
     main_dir = os.path.abspath('.')
     raw_chat_file = os.path.join(main_dir, 'files', 'chat.txt')
+    
+    chat = ChatParser(raw_chat_file)
+    timestamps = chat.parse_raw()
+    pretty = pprint.PrettyPrinter(indent=4)
 
-    raw_chat = read_file(raw_chat_file)
-    messages = parse_lines(raw_chat)
-    print(f'message slice: {messages[:5]}')
+    pretty.pprint(timestamps[:5])
+    frameGen = FrameGenerator(timestamps)
+    frameGen.generate_frames()
     
 if __name__ == "__main__":
     main()
