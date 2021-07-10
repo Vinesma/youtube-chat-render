@@ -88,7 +88,6 @@ def parse_lines(lines):
         line = lines[line_count]
         # Check if the timestamp matches a message
         if current_time != get_timestamp(line):
-            print(f'{current_time} has no messages')
             # If not: set an empty message at that timestamp and add one second to the clock
             chat_message = {
                 'author': None,
@@ -122,25 +121,7 @@ def parse_lines(lines):
                                                                                 )
 
     print(f'Livestream ran for: {livestream_length}')
-    return [messages, livestream_length]
-
-def find_empty(messages, livestream_length):
-    time_hour = 0
-    time_minute = 0
-    time_second = 0
-    count = 0
-    time = f'{time_minute}:{time_second:02}'
-
-    while time != livestream_length:
-        if time != messages[count]:
-            print(f'{time} has no messages.')
-
-            time, time_hour, time_minute, time_second = advance_time(time_hour,
-                                                                    time_minute, 
-                                                                    time_second,
-                                                                    )
-        else:
-            count += 1
+    return messages
 
 def generate_frame(messages):
     """Generate one frame of the chat window"""
@@ -169,18 +150,14 @@ def generate_frame(messages):
 
     image.show()
     print(f'image window supports {frame_message_count} messages')
-
-
+    
 def main():
     main_dir = os.path.abspath('.')
     raw_chat_file = os.path.join(main_dir, 'files', 'chat.txt')
 
     raw_chat = read_file(raw_chat_file)
-    messages, livestream_length = parse_lines(raw_chat)
-
-    # generate_frame(messages)
-
-    # find_empty(messages, livestream_length)
+    messages = parse_lines(raw_chat)
+    print(f'message slice: {messages[:5]}')
     
 if __name__ == "__main__":
     main()
