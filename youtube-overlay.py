@@ -12,7 +12,7 @@ def main():
     timestamps = chat.parse_raw()
     pretty = pprint.PrettyPrinter(indent=4)
 
-    pretty.pprint(timestamps[:5])
+    pretty.pprint(timestamps[2])
     frameGen = FrameGenerator(timestamps)
     frameGen.generate_frames()
     
