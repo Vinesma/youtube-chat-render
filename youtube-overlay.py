@@ -1,5 +1,7 @@
 import os
 
+import ffmpeg
+
 from core.chat import ChatParser
 from core.frame import FrameGenerator
 
@@ -12,6 +14,9 @@ def main():
 
     frameGen = FrameGenerator(timestamps)
     frameGen.generate_frames()
+
+    print('Generating video file...')
+    ffmpeg.input('./frames/frame_*.png', pattern_type='glob', framerate=1).output('chat.mp4').run()
     
 if __name__ == "__main__":
     main()
