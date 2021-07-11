@@ -1,4 +1,5 @@
 env/
 files/*
+frames/*
 *__pycache__
 *.pyc

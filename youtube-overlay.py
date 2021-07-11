@@ -1,5 +1,4 @@
 import os
-import pprint
 
 from core.chat import ChatParser
 from core.frame import FrameGenerator
@@ -10,9 +9,7 @@ def main():
     
     chat = ChatParser(raw_chat_file)
     timestamps = chat.parse_raw()
-    pretty = pprint.PrettyPrinter(indent=4)
 
-    pretty.pprint(timestamps[2])
     frameGen = FrameGenerator(timestamps)
     frameGen.generate_frames()
     

@@ -4,6 +4,7 @@ from core.utils.fileReader import FileReader
 from core.utils.timestamp import Time
 
 class ChatParser:
+    """Parse chat and return a list of timestamps along with their contents"""
     
     def __init__(self, file_path):
         self.file_path = file_path
