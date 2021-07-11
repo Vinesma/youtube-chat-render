@@ -3,3 +3,4 @@ files/*
 frames/*
 *__pycache__
 *.pyc
+*.mp4

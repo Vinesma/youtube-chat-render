@@ -2,7 +2,7 @@ from os import path
 
 from PIL import Image, ImageDraw, ImageFont
 
-class FrameGenerator():
+class FrameGenerator:
     """Manages and generates frames for the chat window
 
         Args (mandatory):
@@ -15,7 +15,7 @@ class FrameGenerator():
             width - Width of window.
     """
     
-    def __init__(self, timestamps, font_size = 18, spacing = 2, message_count = 30, width = 400):
+    def __init__(self, timestamps, font_size = 14, spacing = 2, message_count = 25, width = 300):
         # Mandatory
         self.timestamps = timestamps
         # Optional
@@ -33,8 +33,8 @@ class FrameGenerator():
         # Image
         self.image_width = width
         self.image_height = self.row_height * message_count
-        self.image_type='RGBA'
-        self.image_bg_color_rgba = (28, 31, 32, 200)
+        self.image_type='RGB'
+        self.image_bg_color_rgba = (28, 31, 32)
         # Management
         self._last_contents = []
         self._frame_count = 0
@@ -83,13 +83,11 @@ class FrameGenerator():
             
         self._advance_frame_count()
         self._set_last_content(contents)
-        image.save(path.join(self._save_path, f'frame_{self._get_frame_count():06}.png'))
+        image.save(path.join(self._save_path, f'frame_{self._get_frame_count():08}.png'))
     
     def generate_frames(self):
         """Manage and generate frames"""
         
-        print('Generating frames, this may take a while...')
-
         for time_slice in self.timestamps:
             self._generate_frame(time_slice)
                 
