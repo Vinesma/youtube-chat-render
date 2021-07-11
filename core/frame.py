@@ -83,7 +83,7 @@ class FrameGenerator:
             
         self._advance_frame_count()
         self._set_last_content(contents)
-        image.save(path.join(self._save_path, f'frame_{self._get_frame_count():08}.png'))
+        image.save(path.join(self._save_path, f'frame_{self._get_frame_count():06}.png'))
     
     def generate_frames(self):
         """Manage and generate frames"""

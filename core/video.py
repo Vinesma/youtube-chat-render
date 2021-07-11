@@ -10,15 +10,14 @@ class Video:
             'ffmpeg',
             '-v',
             'error',
+            '-framerate',
+            f'{framerate}',
             '-i',
             _input,
-            '-pattern_type="glob"',
-            '-framerate',
-            framerate,
             output,
         ]
         run(command, check=True, text=True)
-    
+
     @staticmethod
     def overlay(video, chat, opacity = 0.8, position = (0, 0)):
         """Overlay the chat window onto the video at the specified position (top left corner by default)."""
