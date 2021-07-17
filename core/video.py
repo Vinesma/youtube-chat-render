@@ -19,7 +19,7 @@ class Video:
         run(command, check=True, text=True)
 
     @staticmethod
-    def overlay(video, chat, opacity, position):
+    def overlay(video, chat, opacity, position, output):
         """Overlay the chat window onto the video at the specified position (top left corner by default)."""
         command = [
             'ffmpeg',
@@ -31,7 +31,7 @@ class Video:
             chat,
             '-filter_complex',
             f'[1]format=yuva444p,colorchannelmixer=aa={opacity}[in2];[0][in2]overlay={position[0]}:{position[1]}',
-            'output.mp4',
+            output,
         ]
         run(command, check=True, text=True)
     

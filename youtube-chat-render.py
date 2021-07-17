@@ -86,7 +86,8 @@ def main():
                 args.overlay_position_x,
                 args.overlay_position_y
                 ),
-            opacity=args.overlay_opacity
+            opacity=args.overlay_opacity,
+            output=args.output_video_path,
             )
 
     if not args.no_clean:
