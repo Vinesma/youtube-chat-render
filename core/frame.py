@@ -15,10 +15,8 @@ class FrameGenerator:
             width - Width of window.
     """
     
-    def __init__(self, timestamps, font_size = 14, spacing = 2, message_count = 25, width = 300):
-        # Mandatory
+    def __init__(self, timestamps, font_size, spacing, message_count, width, dry_run):
         self.timestamps = timestamps
-        # Optional
         # Font
         self.font_size = font_size
         self.font_path='/usr/share/fonts/OTF/ipamp.ttf'
@@ -39,6 +37,7 @@ class FrameGenerator:
         self._last_contents = []
         self._frame_count = 0
         self._save_path = path.join('.', 'frames')
+        self._dry_run = dry_run
         
     def _set_last_content(self, content):
         self._last_contents = content
@@ -90,5 +89,10 @@ class FrameGenerator:
         
         for time_slice in self.timestamps:
             self._generate_frame(time_slice)
+
+            # Generate only 30 seconds if dry running
+            if self._dry_run and self._get_frame_count() > 29:
+                print('Stopping because of --dry-run')
+                break
                 
         print(f'Done. Generated {self._get_frame_count()} frames.')
