@@ -10,7 +10,7 @@ class Args:
 
     def __init__(
         self,
-        input_chat_path = os.path.join(_main_dir, 'files', 'chat.txt'),
+        input_chat_path = os.path.join(_main_dir, 'chat.txt'),
         input_video_path = os.path.join(_main_dir, 'video.mp4'),
         output_frames_path = os.path.join(_main_dir, 'frames'),
         output_chat_path = os.path.join(_main_dir, 'chat.mp4'),

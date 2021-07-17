@@ -34,6 +34,10 @@ def main():
     args = Args()
     args.load_args()
     
+    # Check if a folder exists for outputting frames to
+    if not os.path.exists(args.output_frames_path):
+        raise Exception(f'Please create the {args.output_frames_path} folder!')
+    
     # If dry running, generate a 30 sec video file for testing
     if args.dry_run:
         Video.gen_dry_run(args.input_video_path)
